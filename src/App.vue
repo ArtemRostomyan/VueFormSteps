@@ -114,6 +114,31 @@
                   <div class="invalid-feedback" v-if="!$v.formReg.career.alpha">{{ alphaText }}</div>
               </div>
 
+              <div class="form-group">
+                  <label for="password">Пароль</label>
+                  
+                  <input @blur="$v.formReg.password.$touch()"
+                         :class="status($v.formReg.password)"
+                         v-model.trim="formReg.password"
+                         type="text" class="form-control" id="password">
+                    
+                  <div class="invalid-feedback" v-if="!$v.formReg.password.required">{{ reqText }}</div>
+                  <div class="invalid-feedback" 
+                       v-if="!$v.formReg.password.minLength">{{ minLengthText }}</div>
+              </div>
+
+              <div class="form-group">
+                  <label for="passwordConfirm">Подтверждение пароля</label>
+                  
+                  <input @blur="$v.formReg.passwordConfirm.$touch()"
+                         :class="status($v.formReg.passwordConfirm)"
+                         v-model.trim="formReg.passwordConfirm"
+                         type="text" class="form-control" id="passwordConfirm">
+                  
+                  <div class="invalid-feedback" 
+                       v-if="!$v.formReg.passwordConfirm.sameAs">{{ passwordConfirmText }}</div>
+              </div>
+
               <button @click="step--" type="button" class="btn btn-light mr-2">Назад</button>
               <button :disabled="disabledBtnFinish"
                       type="submit" class="btn btn-primary">Зарегистрироваться</button>
@@ -127,7 +152,7 @@
 </template>
 
 <script>
-import { email, required, helpers } from 'vuelidate/lib/validators'
+import { email, required, minLength, helpers, sameAs } from 'vuelidate/lib/validators'
 
 const alpha = helpers.regex('alpha', /^[a-zA-Zа-яёА-ЯЁ]*$/)
 
@@ -140,6 +165,8 @@ export default {
         yearEnd: 2020,
         reqText: 'Поле обязательно для заполнения',
         alphaText: 'Запрещены цифры, пробелы и другие символы',
+        minLengthText: 'Минимальная длина 6 символов!',
+        passwordConfirmText: 'Пароли не совпадают',
         formReg: {
           email: '',
           name: '',
@@ -147,19 +174,27 @@ export default {
           country: '',
           city: '',
           year: '',
-          career: ''
+          career: '',
+          password: '',
+          passwordConfirm: ''
         }
      }
    },
    computed: {
     disabledBtn1() {
-       return this.$v.formReg.name.$invalid || this.$v.formReg.surname.$invalid || this.$v.formReg.email.$invalid
+       return this.$v.formReg.name.$invalid || 
+              this.$v.formReg.surname.$invalid || 
+              this.$v.formReg.email.$invalid
     },
     disabledBtn2() {
-       return this.$v.formReg.country.$invalid || this.$v.formReg.city.$invalid
+       return this.$v.formReg.country.$invalid || 
+              this.$v.formReg.city.$invalid
     },
     disabledBtnFinish() {
-       return this.$v.formReg.year.$invalid || this.$v.formReg.career.$invalid
+       return this.$v.formReg.year.$invalid || 
+              this.$v.formReg.career.$invalid || 
+              this.$v.formReg.password.$invalid || 
+              this.$v.formReg.passwordConfirm.$invalid
     }
    },
    methods: {
@@ -179,6 +214,7 @@ export default {
           console.log('Город: ' + this.formReg.city)
           console.log('Год рождения: ' + this.formReg.year)
           console.log('Профессия: ' + this.formReg.career)
+          console.log('Пароль: ' + this.formReg.password)
         console.groupEnd()
 
         this.reset()
@@ -228,6 +264,13 @@ export default {
           },
           career: {
             alpha
+          },
+          password: {
+            required,
+            minLength: minLength(6)
+          },
+          passwordConfirm: {
+            sameAs: sameAs('password')
           }
       }
   },
